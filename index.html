@@ -19,6 +19,12 @@
   --shadow: 0 6px 20px rgba(17,24,39,0.08);
   --radius: 14px;
   --blur: 8px;
+
+  /* animation tokens */
+  --ani-fast: 160ms;
+  --ani-med: 300ms;
+  --ani-slow: 520ms;
+  --easing: cubic-bezier(.2,.9,.2,1);
 }
 
 body.dark{
@@ -37,6 +43,11 @@ body.dark{
 *{box-sizing:border-box}
 html,body{height:100%; margin:0; font-family:Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
 a{color:inherit}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important}
+}
 
 /* Layout */
 .app {
@@ -57,6 +68,7 @@ a{color:inherit}
   background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.35));
   border-bottom: 1px solid rgba(0,0,0,0.03);
   box-shadow: var(--shadow);
+  transition: background var(--ani-med) var(--easing), box-shadow var(--ani-med) var(--easing), transform var(--ani-med) var(--easing);
 }
 body.dark .header {
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
@@ -72,7 +84,10 @@ body.dark .header {
   background: linear-gradient(135deg,var(--accent),var(--accent-2));
   display:flex; align-items:center; justify-content:center; color:white; font-weight:700; box-shadow: 0 6px 18px rgba(255,77,77,0.18);
   font-family:Poppins, Inter; font-size:18px;
+  transition: transform var(--ani-fast) var(--easing), box-shadow var(--ani-fast) var(--easing);
 }
+.logo:hover{ transform: translateY(-3px) rotate(-2deg) scale(1.03); box-shadow: 0 12px 30px rgba(255,77,77,0.14); }
+
 .title {
   display:flex; flex-direction:column;
 }
@@ -86,20 +101,22 @@ body.dark .header {
 .input {
   display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px;
   background:var(--card); box-shadow: var(--shadow); border:1px solid rgba(0,0,0,0.03);
+  transition: box-shadow var(--ani-fast) var(--easing), transform var(--ani-fast) var(--easing);
 }
 body.dark .input { border:1px solid rgba(255,255,255,0.03); background:var(--glass) }
 .input input{
   border:0; outline:none; background:transparent; color:var(--text); width:220px; font-size:14px;
 }
+.input:focus-within{ transform: translateY(-2px); box-shadow: 0 12px 30px rgba(2,6,23,0.06); }
 
 /* Buttons */
 .btn {
   display:inline-flex; gap:8px; align-items:center; padding:8px 12px; border-radius:10px;
   border:1px solid var(--accent); background:transparent; color:var(--accent); cursor:pointer; font-weight:600;
-  transition:all .18s ease; font-size:14px;
+  transition:all var(--ani-fast) var(--easing); font-size:14px;
 }
 .btn.ghost { border-color:transparent; color:var(--muted); background:transparent; }
-.btn:hover { transform:translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06) }
+.btn:hover { transform:translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.06) }
 .btn.primary { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:white; border:0 }
 .btn.small { padding:6px 10px; font-size:13px }
 
@@ -126,13 +143,26 @@ body.dark .input { border:1px solid rgba(255,255,255,0.03); background:var(--gla
   padding:14px;
   box-shadow: var(--shadow);
   border:1px solid rgba(0,0,0,0.03);
-  transition: transform .25s ease, opacity .25s ease, box-shadow .25s;
+  transition: transform var(--ani-med) var(--easing), opacity var(--ani-med) var(--easing), box-shadow var(--ani-med) var(--easing);
   cursor:pointer;
   display:flex; flex-direction:column; gap:10px; min-height:110px; overflow:hidden;
+  transform-origin:center center;
+  will-change:transform, opacity;
+  opacity:0; transform: translateY(8px) scale(.995);
 }
 body.dark .card { border:1px solid rgba(255,255,255,0.03) }
 
-.card:hover { transform:translateY(-6px) }
+.card.visible{ opacity:1; transform:none }
+
+.card:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 18px 50px rgba(2,6,23,0.12) }
+
+/* remove hover effects on touch devices */
+@media (hover: none) and (pointer: coarse){
+  .card:hover { transform:none; box-shadow: var(--shadow) }
+  .logo:hover{ transform:none }
+  .btn:hover{ transform:none }
+}
+
 .card .meta { display:flex; justify-content:space-between; align-items:center; gap:8px; }
 .card h3 { margin:0; color:var(--accent); font-size:15px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .card p { margin:0; color:var(--muted); font-size:13px; line-height:1.3; overflow:hidden; max-height:3.6em; }
@@ -152,22 +182,27 @@ body.dark .pill { border-color: rgba(255,255,255,0.03) }
 /* overlay backdrop for fullscreen */
 #fsOverlay .backdrop {
   position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.15)); backdrop-filter: blur(6px);
+  opacity:0; transition: opacity var(--ani-med) var(--easing);
 }
+#fsOverlay .backdrop.show { opacity:1 }
 
 /* Fullscreen card */
 .fullscreen-card {
   position:relative; width:100%; max-width:920px; border-radius:16px; background:var(--card); padding:18px; box-shadow: 0 30px 80px rgba(10,10,12,0.4);
   display:flex; flex-direction:column; gap:12px; box-sizing:border-box; border:1px solid rgba(0,0,0,0.04);
+  opacity:0; transform: translateY(-12px) scale(.995); transition: transform var(--ani-med) var(--easing), opacity var(--ani-med) var(--easing), box-shadow var(--ani-med) var(--easing);
 }
+.fullscreen-card.enter { opacity:1; transform:none }
+.fullscreen-card.leave { opacity:0; transform: translateY(6px) scale(.98) }
 body.dark .fullscreen-card { border:1px solid rgba(255,255,255,0.03) }
 
 .fs-controls { display:flex; gap:8px; align-items:center; justify-content:space-between; }
 .fs-actions { display:flex; gap:8px; align-items:center; }
 
-.fs-title { font-size:20px; font-weight:700; color:var(--accent); padding:6px 8px; border-radius:8px }
+.fs-title { font-size:20px; font-weight:700; color:var(--accent); padding:6px 8px; border-radius:8px; transition: color var(--ani-fast) var(--easing); }
 body.dark .fs-title { color: var(--accent) }
 
-.fs-content { min-height:320px; max-height:60vh; overflow:auto; padding:8px; border-radius:10px; background: transparent; border:1px dashed rgba(0,0,0,0.04); }
+.fs-content { min-height:320px; max-height:60vh; overflow:auto; padding:8px; border-radius:10px; background: transparent; border:1px dashed rgba(0,0,0,0.04); transition: box-shadow var(--ani-fast) var(--easing); }
 body.dark .fs-content { border-color: rgba(255,255,255,0.03) }
 
 /* contenteditable styling */
@@ -177,20 +212,25 @@ body.dark .fs-content { border-color: rgba(255,255,255,0.03) }
 
 /* Notification */
 .toast {
-  position:fixed; left:50%; transform:translateX(-50%); bottom:26px; z-index:3000;
+  position:fixed; left:50%; transform:translateX(-50%) translateY(20px); bottom:26px; z-index:3000;
   padding:10px 16px; border-radius:12px; background:var(--accent); color:white; font-weight:600; box-shadow:0 8px 30px rgba(0,0,0,0.2);
-  opacity:0; transition:opacity .25s ease, transform .25s; pointer-events:none;
+  opacity:0; transition: transform var(--ani-fast) var(--easing), opacity var(--ani-fast) var(--easing);
+  pointer-events:none;
 }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* Password overlay */
 .overlay {
   position:fixed; inset:0; z-index:5000; display:flex; align-items:center; justify-content:center;
   background: linear-gradient(180deg, rgba(2,6,23,0.55), rgba(2,6,23,0.6));
+  opacity:0; transition: opacity var(--ani-med) var(--easing);
 }
+.overlay.show { opacity:1 }
 .password-modal {
   width: calc(100% - 48px); max-width:420px; border-radius:14px; padding:22px; background:var(--card); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-  display:flex; flex-direction:column; gap:12px; align-items:center;
+  display:flex; flex-direction:column; gap:12px; align-items:center; transform: translateY(6px); transition: transform var(--ani-med) var(--easing);
 }
+.overlay.show .password-modal{ transform:none }
 .password-modal h2{ margin:0; font-size:18px; color:var(--text) }
 .password-modal p{ margin:0; color:var(--muted); font-size:13px }
 .password-modal input{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.06); background:transparent; color:var(--text) }
@@ -220,13 +260,19 @@ body.dark .password-modal input { border-color: rgba(255,255,255,0.03) }
   .card { min-height:90px }
   .fs-content { max-height:50vh }
 }
+
+/* Slightly reduce animation intensity on small screens */
+@media (max-width:560px){
+  :root{ --ani-fast:120ms; --ani-med:200ms; }
+  .card:hover{ transform:translateY(-6px) scale(1.02) }
+}
 </style>
 </head>
 <body>
 
 <div class="app" id="appRoot">
   <!-- Password overlay (shown until correct) -->
-  <div id="passwordOverlay" class="overlay" aria-hidden="false" style="display:flex;">
+  <div id="passwordOverlay" class="overlay show" aria-hidden="false" style="display:flex;">
     <div class="password-modal" role="dialog" aria-modal="true">
       <h2>Доступ к блокноту</h2>
       <p>Введите пароль, чтобы открыть блокнот</p>
@@ -282,7 +328,6 @@ const PASSWORD = '87653421';
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
 let darkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
 let autosaveTimer = null;
-let savingIndicatorTimer = null;
 let currentOpenId = null; // id of open fullscreen note
 
 if (darkMode) document.body.classList.add('dark');
@@ -298,9 +343,9 @@ function mdToHtml(md){
   let out = '', inList = false;
   for(let line of lines){
     const trimmed = line.trim();
-    if(trimmed.match(/^(-|\*)\s+/)){
+    if(trimmed.match(/^(\-|\*)\s+/)){
       if(!inList){ out += '<ul>'; inList = true; }
-      out += '<li>' + trimmed.replace(/^(-|\*)\s+/, '') + '</li>';
+      out += '<li>' + trimmed.replace(/^(\-|\*)\s+/, '') + '</li>';
     } else {
       if(inList){ out += '</ul>'; inList = false; }
       if(trimmed==='') out += '<br>';
@@ -324,11 +369,10 @@ function saveAll(){
 
 function showToast(text, ms=1400){
   toastEl.textContent = text;
-  toastEl.style.opacity = '1';
-  toastEl.style.transform = 'translateY(0)';
+  toastEl.classList.add('show');
   toastEl.setAttribute('aria-hidden','false');
   clearTimeout(toastEl._timeout);
-  toastEl._timeout = setTimeout(()=>{ toastEl.style.opacity='0'; toastEl.setAttribute('aria-hidden','true'); }, ms);
+  toastEl._timeout = setTimeout(()=>{ toastEl.classList.remove('show'); toastEl.setAttribute('aria-hidden','true'); }, ms);
 }
 
 // add animation helper for removal
@@ -369,10 +413,10 @@ function renderGrid(){
 
       card.addEventListener('click', ()=> openFullscreen(note.id));
 
-      card.style.opacity = '0';
-      card.style.transform = 'scale(.96)';
       gridEl.appendChild(card);
-      setTimeout(()=>{ card.style.opacity='1'; card.style.transform='scale(1)'; card.style.transition='all .28s cubic-bezier(.2,.9,.2,1)'; }, 30);
+
+      // animate in (use requestAnimationFrame so CSS transition triggers)
+      requestAnimationFrame(()=>{ card.classList.add('visible'); });
     }
   }
   localStorage.setItem('notes', JSON.stringify(notes));
@@ -460,6 +504,9 @@ function openFullscreen(id){
   `;
   fsOverlay.appendChild(wrapper);
 
+  // tiny delay so CSS transitions apply
+  requestAnimationFrame(()=>{ backdrop.classList.add('show'); wrapper.classList.add('enter'); });
+
   // populate
   const fsTitle = document.getElementById('fsTitle');
   const fsContent = document.getElementById('fsContent');
@@ -527,11 +574,18 @@ function showSavingBadge(on){
 }
 
 function closeFullscreen(){
-  fsOverlay.innerHTML = '';
-  fsOverlay.style.display = 'none';
-  // remove blur class to re-enable interactions
-  document.getElementById('mainContent').classList.remove('blurred');
-  currentOpenId = null;
+  // animate out if present
+  const backdrop = fsOverlay.querySelector('.backdrop');
+  const wrapper = fsOverlay.querySelector('.fullscreen-card');
+  if(wrapper) wrapper.classList.add('leave');
+  if(backdrop) backdrop.classList.remove('show');
+  // remove blur class to re-enable interactions after animation ends
+  setTimeout(()=>{
+    fsOverlay.innerHTML = '';
+    fsOverlay.style.display = 'none';
+    document.getElementById('mainContent').classList.remove('blurred');
+    currentOpenId = null;
+  }, 260);
 }
 
 // ---------- Download ----------
@@ -542,7 +596,7 @@ function downloadNoteById(id){
   const text = note.title + "\n\n" + note.text;
   const blob = new Blob([text], {type: 'text/plain'});
   a.href = URL.createObjectURL(blob);
-  const safe = (note.title || 'note').replace(/[\\\/\:\*\?\"<>\|]/g,'_').slice(0,60);
+  const safe = (note.title || 'note').replace(/[\\\\\/:\*\?\"<>\|]/g,'_').slice(0,60);
   a.download = safe + '.txt';
   document.body.appendChild(a);
   a.click();
@@ -559,6 +613,7 @@ document.getElementById('pwInput').addEventListener('keydown', (e)=> { if(e.key=
 function tryPassword(){
   const v = document.getElementById('pwInput').value;
   if(v === PASSWORD){
+    pwOverlay.classList.remove('show');
     pwOverlay.style.display = 'none';
     document.getElementById('mainContent').classList.remove('blurred');
     showToast('Добро пожаловать!');
@@ -570,7 +625,9 @@ function tryPassword(){
 }
 
 // Blur mainContent initially while password overlay shown
-document.getElementById('mainContent').classList.add('blurred');
+if(document.getElementById('passwordOverlay')){
+  document.getElementById('mainContent').classList.add('blurred');
+}
 
 // ---------- Init render ----------
 renderGrid();
