@@ -1,354 +1,584 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Мой Блокнот</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Мой Блокнот — современный</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f9f9f9;
-    margin: 0;
-    padding: 0;
-    transition: background 0.3s, color 0.3s;
+:root{
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --accent: #ff4d4d;
+  --accent-2: #ff6b6b;
+  --glass: rgba(255,255,255,0.6);
+  --shadow: 0 6px 20px rgba(17,24,39,0.08);
+  --radius: 14px;
+  --blur: 8px;
 }
 
-body.dark {
-    background-color: #121212;
-    color: #e0e0e0;
+body.dark{
+  --bg: #0b0c0f;
+  --card: #0f1114;
+  --text: #e6eef6;
+  --muted: #9aa3b2;
+  --accent: #ff6b6b;
+  --accent-2: #ff8484;
+  --glass: rgba(255,255,255,0.03);
+  --shadow: 0 10px 30px rgba(0,0,0,0.6);
+  --radius: 12px;
+  --blur: 6px;
 }
 
-/* Главный блокнот */
-#mainContent { filter: none; transition: filter 0.3s; }
+*{box-sizing:border-box}
+html,body{height:100%; margin:0; font-family:Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+a{color:inherit}
 
-header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    background-color: white;
-    border-bottom: 1px solid #ff4d4d;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    transition: background 0.3s, border-color 0.3s;
+/* Layout */
+.app {
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  transition:filter .35s ease, opacity .35s ease;
 }
 
-body.dark header {
-    background-color: #1e1e1e;
-    border-color: #ff6b6b;
+/* Header */
+.header {
+  display:flex;
+  gap:16px;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px 24px;
+  backdrop-filter: blur(6px);
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.35));
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+  box-shadow: var(--shadow);
+}
+body.dark .header {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-bottom: 1px solid rgba(255,255,255,0.03);
 }
 
-h1 { color: #ff4d4d; margin: 0; font-weight: 600; }
+/* Left title */
+.brand {
+  display:flex; align-items:center; gap:12px;
+}
+.logo {
+  width:44px; height:44px; border-radius:10px;
+  background: linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex; align-items:center; justify-content:center; color:white; font-weight:700; box-shadow: 0 6px 18px rgba(255,77,77,0.18);
+  font-family:Poppins, Inter; font-size:18px;
+}
+.title {
+  display:flex; flex-direction:column;
+}
+.title .main {font-weight:700; font-size:16px}
+.title .sub {font-size:12px; color:var(--muted)}
 
-button {
-    background: none;
-    border: 1px solid #ff4d4d;
-    color: #ff4d4d;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.3s ease;
+/* Controls */
+.controls {
+  display:flex; gap:10px; align-items:center;
+}
+.input {
+  display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px;
+  background:var(--card); box-shadow: var(--shadow); border:1px solid rgba(0,0,0,0.03); 
+}
+body.dark .input { border:1px solid rgba(255,255,255,0.03); background:var(--glass) }
+.input input{
+  border:0; outline:none; background:transparent; color:var(--text); width:220px; font-size:14px;
 }
 
-body.dark button { border-color: #ff6b6b; color: #ff6b6b; }
+/* Buttons */
+.btn {
+  display:inline-flex; gap:8px; align-items:center; padding:8px 12px; border-radius:10px;
+  border:1px solid var(--accent); background:transparent; color:var(--accent); cursor:pointer; font-weight:600;
+  transition:all .18s ease; font-size:14px;
+}
+.btn.ghost { border-color:transparent; color:var(--muted); background:transparent; }
+.btn:hover { transform:translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06) }
+.btn.primary { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:white; border:0 }
+.body-dark .btn:hover{}
 
-button:hover { background-color: #ffe6e6; transform: scale(1.05); }
-body.dark button:hover { background-color: #330000; }
+.btn.small { padding:6px 10px; font-size:13px }
 
-input#search {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #ff4d4d;
-    margin-right: 10px;
-    transition: all 0.3s;
+/* Main area */
+.container {
+  padding:20px;
+  max-width:1100px;
+  margin:18px auto;
+  width:calc(100% - 40px);
+  flex:1;
 }
 
-body.dark input#search { border-color: #ff6b6b; background-color: #1e1e1e; color: #e0e0e0; }
-
-.notes-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 15px;
-    padding: 20px;
+/* Grid */
+.grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap:18px;
 }
 
-.note {
-    background: white;
-    border: 1px solid #ff4d4d;
-    border-radius: 8px;
-    padding: 15px;
-    position: relative;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-    cursor: pointer;
-    overflow: hidden;
-    transition: all 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+/* Note card */
+.card {
+  background:var(--card);
+  border-radius:12px;
+  padding:14px;
+  box-shadow: var(--shadow);
+  border:1px solid rgba(0,0,0,0.03);
+  transition: transform .25s ease, opacity .25s ease, box-shadow .25s;
+  cursor:pointer;
+  display:flex; flex-direction:column; gap:10px; min-height:110px; overflow:hidden;
 }
+body.dark .card { border:1px solid rgba(255,255,255,0.03) }
 
-body.dark .note { background: #1e1e1e; border-color: #ff6b6b; color: #e0e0e0; }
+.card:hover { transform:translateY(-6px) }
+.card .meta { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.card h3 { margin:0; color:var(--accent); font-size:15px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.card p { margin:0; color:var(--muted); font-size:13px; line-height:1.3; overflow:hidden; max-height:3.6em; }
 
-.note h3 { margin:0; font-weight:600; color:#ff4d4d; }
-body.dark .note h3 { color:#ff6b6b; }
+/* small footer inside card */
+.card .card-footer { display:flex; gap:8px; align-items:center; justify-content:flex-start; margin-top:auto; }
 
-.note p { margin:5px 0 0 0; color:inherit; }
+.pill { padding:6px 8px; font-size:12px; border-radius:8px; border:1px solid rgba(0,0,0,0.04); background:transparent; color:var(--muted) }
+body.dark .pill { border-color: rgba(255,255,255,0.03) }
 
+/* Fullscreen editor */
 .fullscreen {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: white;
-    border: 1px solid #ff4d4d;
-    z-index: 1000;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    transition: background 0.3s, color 0.3s;
-    box-sizing: border-box;
+  position:fixed; inset:0; z-index:2000; display:flex; align-items:flex-start; justify-content:center;
+  padding:28px; background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.15));
+}
+.fullscreen-card {
+  width:100%; max-width:920px; border-radius:16px; background:var(--card); padding:18px; box-shadow: 0 30px 80px rgba(10,10,12,0.4);
+  display:flex; flex-direction:column; gap:12px; box-sizing:border-box; border:1px solid rgba(0,0,0,0.04);
+}
+body.dark .fullscreen-card { border:1px solid rgba(255,255,255,0.03) }
+
+.fs-controls { display:flex; gap:8px; align-items:center; justify-content:space-between; }
+.fs-actions { display:flex; gap:8px; align-items:center; }
+
+.fs-title { font-size:20px; font-weight:700; color:var(--accent); padding:6px 8px; border-radius:8px }
+body.dark .fs-title { color: var(--accent) }
+
+.fs-content { min-height:320px; max-height:60vh; overflow:auto; padding:8px; border-radius:10px; background: transparent; border:1px dashed rgba(0,0,0,0.04); }
+body.dark .fs-content { border-color: rgba(255,255,255,0.03) }
+
+/* contenteditable styling */
+[contenteditable="true"]{ outline:none; caret-color:var(--accent); color:var(--text); font-size:15px; line-height:1.5 }
+.fs-title[contenteditable="true"]{ font-size:22px; font-weight:700; }
+.fs-content[contenteditable="true"]{ white-space:pre-wrap; }
+
+/* Notification */
+.toast {
+  position:fixed; left:50%; transform:translateX(-50%); bottom:26px; z-index:3000;
+  padding:10px 16px; border-radius:12px; background:var(--accent); color:white; font-weight:600; box-shadow:0 8px 30px rgba(0,0,0,0.2);
+  opacity:0; transition:opacity .25s ease, transform .25s; pointer-events:none;
 }
 
-body.dark .fullscreen { background: #1e1e1e; border-color: #ff6b6b; color:#e0e0e0; }
-
-.fullscreen h3, .fullscreen p { outline:none; }
-.fullscreen h3 { font-size:1.8em; color:#ff4d4d; }
-body.dark .fullscreen h3 { color:#ff6b6b; }
-.fullscreen p { flex-grow:1; margin-top:10px; line-height:1.4em; white-space: pre-wrap; }
-
-.close-btn, .delete-btn, .download-btn {
-    margin:5px 5px 5px 0;
-    padding:6px 12px;
-    border-radius:6px;
-    border:1px solid #ff4d4d;
-    background:none;
-    color:#ff4d4d;
-    cursor:pointer;
-    font-size:14px;
-    transition:all 0.3s;
+/* Password overlay */
+.overlay {
+  position:fixed; inset:0; z-index:5000; display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(180deg, rgba(2,6,23,0.55), rgba(2,6,23,0.6));
 }
-
-body.dark .close-btn, body.dark .delete-btn, body.dark .download-btn {
-    border-color:#ff6b6b; color:#ff6b6b;
+.password-modal {
+  width: calc(100% - 48px); max-width:420px; border-radius:14px; padding:22px; background:var(--card); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  display:flex; flex-direction:column; gap:12px; align-items:center;
 }
+.password-modal h2{ margin:0; font-size:18px; color:var(--text) }
+.password-modal p{ margin:0; color:var(--muted); font-size:13px }
+.password-modal input{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.06); background:transparent; color:var(--text) }
+body.dark .password-modal input { border-color: rgba(255,255,255,0.03) }
 
-.close-btn:hover, .delete-btn:hover, .download-btn:hover { background-color:#ffe6e6; }
-body.dark .close-btn:hover, body.dark .delete-btn:hover, body.dark .download-btn:hover { background-color:#330000; }
-
-#notification {
-    position: fixed;
-    bottom: 20px;
-    left:50%;
-    transform: translateX(-50%);
-    background: #ff4d4d;
-    color:white;
-    padding:8px 15px;
-    border-radius:6px;
-    opacity:0;
-    pointer-events:none;
-    transition: opacity 0.5s;
+/* small responsiveness */
+@media (max-width:900px){
+  .input input { width:140px }
+  .container { padding:12px }
 }
-
-body.dark #notification { background:#ff6b6b; }
-
-/* Пароль */
-#passwordOverlay {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: rgba(0,0,0,0.5);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:2000;
-}
-
-#passwordBox {
-    background: white;
-    padding:30px;
-    border-radius:10px;
-    box-shadow:0 5px 20px rgba(0,0,0,0.3);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    width:90%;
-    max-width:350px;
-}
-
-body.dark #passwordBox { background:#1e1e1e; color:#e0e0e0; }
-
-#passwordBox input {
-    padding:8px 12px;
-    border-radius:6px;
-    border:1px solid #ff4d4d;
-    margin-bottom:15px;
-    width:100%;
-    font-size:16px;
-}
-
-body.dark #passwordBox input { border-color:#ff6b6b; background:#121212; color:#e0e0e0; }
-
-#passwordBox button { width:100%; }
-@media (max-width:500px) {
-    .notes-container { grid-template-columns:1fr; padding:10px; }
-    header { flex-direction: column; align-items: flex-start; gap: 10px; }
-    #passwordBox { padding:20px; }
+@media (max-width:560px){
+  .header { padding:12px }
+  .controls { gap:8px; flex-wrap:wrap; }
+  .brand .title .sub { display:none }
+  .grid { gap:12px }
+  .card { min-height:90px }
+  .fs-content { max-height:50vh }
 }
 </style>
 </head>
 <body>
 
-<div id="passwordOverlay">
-    <div id="passwordBox">
-        <h2>Введите пароль</h2>
-        <input type="password" id="sitePassword" placeholder="Пароль">
-        <button onclick="checkPassword()">Войти</button>
+<div class="app" id="appRoot">
+  <!-- Password overlay (shown until correct) -->
+  <div id="passwordOverlay" class="overlay" aria-hidden="false" style="display:flex;">
+    <div class="password-modal" role="dialog" aria-modal="true">
+      <h2>Доступ к блокноту</h2>
+      <p>Введите пароль, чтобы открыть блокнот</p>
+      <input id="pwInput" type="password" placeholder="Введите пароль">
+      <div style="width:100%; display:flex; gap:8px;">
+        <button class="btn primary" style="flex:1" id="pwOk">Войти</button>
+        <button class="btn ghost" style="flex:1" id="pwCancel">Отмена</button>
+      </div>
+      <small style="color:var(--muted); margin-top:6px">Подсказка: у тебя есть код доступа</small>
     </div>
-</div>
+  </div>
 
-<div id="mainContent">
-<header>
-    <h1>Мой Блокнот</h1>
-    <div class="header-controls">
-        <input type="text" id="search" placeholder="Поиск заметок..." oninput="renderNotes()">
-        <button onclick="addNote()">＋ Новая заметка</button>
-        <button onclick="clearAllNotes()">🗑 Очистить блокнот</button>
-        <button onclick="toggleDarkMode()">🌓 Тема</button>
-    </div>
-</header>
+  <!-- Main content -->
+  <div id="mainContent" class="main">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">MB</div>
+        <div class="title">
+          <div class="main">Мой Блокнот</div>
+          <div class="sub">Простой, красивый и личный</div>
+        </div>
+      </div>
 
-<div class="notes-container" id="notesContainer"></div>
-<div id="fullscreenContainer" style="display:none;"></div>
-<div id="notification"></div>
+      <div class="controls">
+        <div class="input" role="search" aria-label="Поиск">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="opacity:.6"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="searchInput" placeholder="Поиск заметок..." />
+        </div>
+
+        <button class="btn" id="addBtn">＋ Новая</button>
+        <button class="btn" id="clearBtn">🗑 Очистить</button>
+        <button class="btn" id="themeBtn">🌓 Тема</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <div id="grid" class="grid" aria-live="polite"></div>
+    </main>
+
+    <!-- fullscreen editor placeholder -->
+    <div id="fsOverlay" style="display:none;"></div>
+
+    <!-- toast -->
+    <div id="toast" class="toast" aria-hidden="true"></div>
+  </div>
 </div>
 
 <script>
-// Пароль
-function checkPassword(){
-    const val=document.getElementById('sitePassword').value;
-    if(val==='87653421'){
-        document.getElementById('passwordOverlay').style.display='none';
-        document.getElementById('mainContent').style.filter='none';
-    }else{
-        alert('Неверный пароль!');
-    }
-}
-
-// Инициализация
+// ---------- Data and storage ----------
+const PASSWORD = '87653421';
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
 let darkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
-if(darkMode) document.body.classList.add('dark');
-let saveTimeout = null;
+let autosaveTimer = null;
+let savingIndicatorTimer = null;
+let currentOpenId = null; // id of open fullscreen note
 
-// Уведомление
-function showNotification(text) {
-    const notif = document.getElementById('notification');
-    notif.innerText = text;
-    notif.style.opacity = 1;
-    setTimeout(()=>{notif.style.opacity=0}, 1500);
-}
+if (darkMode) document.body.classList.add('dark');
 
-// Рендер заметок
-function renderNotes() {
-    const container = document.getElementById('notesContainer');
-    container.innerHTML='';
-    const query = document.getElementById('search').value.toLowerCase();
-    notes.forEach((note,index)=>{
-        if(note.title.toLowerCase().includes(query) || note.text.toLowerCase().includes(query)) {
-            const noteElem=document.createElement('div');
-            noteElem.className='note';
-            noteElem.style.opacity=0;
-            noteElem.style.transform='scale(0.95)';
-            noteElem.innerHTML=`<h3>${note.title}</h3><p>${note.text.substring(0,50)}...</p>`;
-            noteElem.onclick=()=>openFullscreen(index);
-            container.appendChild(noteElem);
-            setTimeout(()=>{noteElem.style.opacity=1; noteElem.style.transform='scale(1)';},50);
-        }
-    });
-    localStorage.setItem('notes',JSON.stringify(notes));
-}
+// Utility: uid
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
 
-// Добавление заметки
-function addNote() {
-    notes.push({title:'Новая заметка',text:'Текст...'});
-    renderNotes();
-    showNotification('Заметка добавлена');
-}
-
-// Очистка всех заметок
-function clearAllNotes(){
-    if(confirm('Вы уверены, что хотите удалить все заметки?')){
-        notes=[];
-        renderNotes();
-        showNotification('Все заметки удалены');
+// ---------- Small Markdown -> HTML (basic) ----------
+function mdToHtml(md){
+  if(!md) return '';
+  // escape HTML first
+  const esc = md.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // lines -> lists or paragraphs
+  const lines = esc.split('\n');
+  let out = '', inList = false;
+  for(let line of lines){
+    const trimmed = line.trim();
+    if(trimmed.match(/^(-|\*)\s+/)){
+      if(!inList){ out += '<ul>'; inList = true; }
+      out += '<li>' + trimmed.replace(/^(-|\*)\s+/, '') + '</li>';
+    } else {
+      if(inList){ out += '</ul>'; inList = false; }
+      if(trimmed==='') out += '<br>';
+      else out += '<p>' + trimmed + '</p>';
     }
+  }
+  if(inList) out += '</ul>';
+  // inline bold **text**
+  out = out.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // inline italic *text*
+  out = out.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  return out;
 }
 
-// Полноэкранный режим
-function openFullscreen(index){
-    const container=document.getElementById('fullscreenContainer');
-    container.style.display='flex';
-    container.className='fullscreen';
-    container.innerHTML=`
-        <div style="display:flex; justify-content:flex-end; gap:5px; flex-wrap:wrap; margin-bottom:10px;">
-            <button class="close-btn" onclick="closeFullscreen()">✖ Закрыть</button>
-            <button class="download-btn" onclick="downloadNote(${index})">💾 Скачать</button>
-            <button class="delete-btn" onclick="deleteNote(${index})">🗑 Удалить</button>
+// ---------- Rendering ----------
+const gridEl = document.getElementById('grid');
+const searchEl = document.getElementById('searchInput');
+const toastEl = document.getElementById('toast');
+
+function saveAll(){
+  localStorage.setItem('notes', JSON.stringify(notes));
+}
+
+function showToast(text, ms=1400){
+  toastEl.textContent = text;
+  toastEl.style.opacity = '1';
+  toastEl.style.transform = 'translateY(0)';
+  toastEl.setAttribute('aria-hidden','false');
+  clearTimeout(toastEl._timeout);
+  toastEl._timeout = setTimeout(()=>{ toastEl.style.opacity='0'; toastEl.setAttribute('aria-hidden','true'); }, ms);
+}
+
+// add animation helper for removal
+function animateAndRemoveCard(cardEl, callback){
+  cardEl.style.transition = 'transform .28s ease, opacity .28s ease';
+  cardEl.style.transform = 'scale(.85)';
+  cardEl.style.opacity = '0';
+  setTimeout(()=>{ callback(); }, 300);
+}
+
+function renderGrid(){
+  const q = (searchEl.value || '').toLowerCase();
+  gridEl.innerHTML = '';
+  // sort: newest first
+  const sorted = notes.slice().sort((a,b)=>b.updatedAt - a.updatedAt);
+  for(const note of sorted){
+    if(note.title.toLowerCase().includes(q) || note.text.toLowerCase().includes(q)){
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.id = note.id;
+      // card content (rendered markdown preview)
+      const meta = document.createElement('div'); meta.className='meta';
+      const title = document.createElement('h3');
+      title.innerText = note.title || 'Без названия';
+      const date = document.createElement('div'); date.className='pill'; date.innerText = timeAgo(note.updatedAt);
+      meta.appendChild(title); meta.appendChild(date);
+
+      const body = document.createElement('div');
+      body.innerHTML = mdToHtml(note.text).slice(0,300);
+      // ensure body shows as preview text
+      const previewText = document.createElement('p');
+      // try to extract text summary (strip tags)
+      const tmp = document.createElement('div'); tmp.innerHTML = body.innerHTML;
+      let txt = tmp.innerText || '';
+      if(txt.length>140) txt = txt.slice(0,140)+'...';
+      previewText.innerText = txt;
+
+      const footer = document.createElement('div'); footer.className='card-footer';
+      const tag = document.createElement('div'); tag.className='pill'; tag.innerText = note.tag || 'Заметка';
+      footer.appendChild(tag);
+
+      card.appendChild(meta);
+      card.appendChild(previewText);
+      card.appendChild(footer);
+
+      card.addEventListener('click', ()=> openFullscreen(note.id));
+
+      // entry animation
+      card.style.opacity = '0';
+      card.style.transform = 'scale(.96)';
+      gridEl.appendChild(card);
+      setTimeout(()=>{ card.style.opacity='1'; card.style.transform='scale(1)'; card.style.transition='all .28s cubic-bezier(.2,.9,.2,1)'; }, 30);
+    }
+  }
+}
+
+function timeAgo(ts){
+  if(!ts) return '';
+  const d = Date.now() - ts;
+  const sec = Math.floor(d/1000);
+  if(sec < 10) return 'только что';
+  if(sec < 60) return sec + ' сек. назад';
+  const min = Math.floor(sec/60);
+  if(min < 60) return min + ' мин. назад';
+  const h = Math.floor(min/60);
+  if(h < 24) return h + ' ч. назад';
+  const days = Math.floor(h/24);
+  return days + ' дн. назад';
+}
+
+// ---------- Actions ----------
+document.getElementById('addBtn').addEventListener('click', ()=>{
+  const n = { id: uid(), title: 'Новая заметка', text: 'Текст...', updatedAt: Date.now(), tag: 'Заметка' };
+  notes.push(n);
+  saveAll();
+  renderGrid();
+  showToast('Заметка добавлена');
+});
+
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  if(!confirm('Удалить все заметки? Это действие нельзя отменить.')) return;
+  notes = [];
+  saveAll();
+  renderGrid();
+  showToast('Все заметки удалены');
+});
+
+document.getElementById('themeBtn').addEventListener('click', ()=>{
+  document.body.classList.toggle('dark');
+  darkMode = document.body.classList.contains('dark');
+  localStorage.setItem('darkMode', JSON.stringify(darkMode));
+});
+
+// search input
+searchEl.addEventListener('input', ()=> renderGrid());
+
+// ---------- Fullscreen editor ----------
+const fsOverlay = document.getElementById('fsOverlay');
+
+function openFullscreen(id){
+  const note = notes.find(n => n.id === id);
+  if(!note) return;
+  currentOpenId = id;
+  fsOverlay.innerHTML = '';
+  fsOverlay.style.display = 'flex';
+  fsOverlay.style.alignItems = 'flex-start';
+  fsOverlay.style.justifyContent = 'center';
+
+  // blur background slightly
+  document.getElementById('mainContent').style.filter = `blur(${document.body.classList.contains('dark')? '6px' : '4px'})`;
+  document.getElementById('mainContent').style.pointerEvents = 'none';
+
+  // build fullscreen card
+  const wrapper = document.createElement('div');
+  wrapper.className = 'fullscreen';
+  wrapper.innerHTML = `
+    <div class="fullscreen-card" role="dialog" aria-modal="true">
+      <div class="fs-controls">
+        <div class="fs-actions">
+          <button class="btn small close-fs">✖ Закрыть</button>
+          <button class="btn small download-fs">💾 Скачать</button>
+          <button class="btn small delete-fs">🗑 Удалить</button>
         </div>
-        <h3 contenteditable="true" id="fsTitle">${notes[index].title}</h3>
-        <p contenteditable="true" id="fsText">${notes[index].text}</p>
-    `;
-    const fsTitle=document.getElementById('fsTitle');
-    const fsText=document.getElementById('fsText');
+        <div style="display:flex; gap:8px; align-items:center">
+          <div class="fs-title" id="fsTitle" contenteditable="true"></div>
+          <div style="color:var(--muted); font-size:13px; margin-left:8px" id="fsTime"></div>
+        </div>
+      </div>
+      <div class="fs-content" id="fsContent" contenteditable="true"></div>
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button class="btn ghost close-fs">Готово</button>
+      </div>
+    </div>
+  `;
+  fsOverlay.appendChild(wrapper);
 
-    function save() {
-        notes[index].title=fsTitle.innerText;
-        notes[index].text=fsText.innerText;
-        localStorage.setItem('notes',JSON.stringify(notes));
-        renderNotes();
-        showNotification('Заметка сохранена');
+  // populate
+  const fsTitle = document.getElementById('fsTitle');
+  const fsContent = document.getElementById('fsContent');
+  const fsTime = document.getElementById('fsTime');
+  fsTitle.innerText = note.title;
+  fsContent.innerText = note.text;
+  fsTime.innerText = timeAgo(note.updatedAt);
+
+  // handlers
+  wrapper.querySelectorAll('.close-fs').forEach(b => b.addEventListener('click', ()=> closeFullscreen()));
+  wrapper.querySelector('.download-fs').addEventListener('click', ()=> {
+    downloadNoteById(id);
+  });
+  wrapper.querySelector('.delete-fs').addEventListener('click', ()=> {
+    if(!confirm('Удалить эту заметку?')) return;
+    // animate corresponding card
+    const card = gridEl.querySelector('.card[data-id="'+id+'"]');
+    if(card){
+      animateAndRemoveCard(card, ()=> {
+        notes = notes.filter(n=>n.id!==id);
+        saveAll();
+        renderGrid();
+      });
+    } else {
+      notes = notes.filter(n=>n.id!==id);
+      saveAll();
+      renderGrid();
     }
+    closeFullscreen();
+    showToast('Заметка удалена');
+  });
 
-    fsTitle.oninput=fsText.oninput=(e)=>{
-        if(saveTimeout) clearTimeout(saveTimeout);
-        saveTimeout=setTimeout(save, 1000); // автосохранение
-    };
+  // autosave on input (debounced)
+  function scheduleSave(){
+    if(autosaveTimer) clearTimeout(autosaveTimer);
+    showSavingBadge(true);
+    autosaveTimer = setTimeout(()=> {
+      const idx = notes.findIndex(n=>n.id===id);
+      if(idx>=0){
+        notes[idx].title = fsTitle.innerText.trim() || 'Без названия';
+        notes[idx].text = fsContent.innerText;
+        notes[idx].updatedAt = Date.now();
+        saveAll();
+        renderGrid();
+        showToast('Заметка сохранена');
+      }
+      showSavingBadge(false);
+    }, 900);
+  }
+  fsTitle.addEventListener('input', scheduleSave);
+  fsContent.addEventListener('input', scheduleSave);
+
+  // initial focus
+  fsContent.focus();
 }
 
-// Закрыть полноэкранный режим
+// show saving small indicator at header
+function showSavingBadge(on){
+  // place small toast near theme button
+  const btn = document.getElementById('themeBtn');
+  if(on){
+    btn.dataset.saving = '1';
+    btn.innerText = 'Сохраняется…';
+  } else {
+    delete btn.dataset.saving;
+    btn.innerText = document.body.classList.contains('dark') ? '🌓 Тема' : '🌓 Тема';
+  }
+}
+
 function closeFullscreen(){
-    document.getElementById('fullscreenContainer').style.display='none';
+  fsOverlay.innerHTML = '';
+  fsOverlay.style.display = 'none';
+  document.getElementById('mainContent').style.filter = 'none';
+  document.getElementById('mainContent').style.pointerEvents = 'auto';
+  currentOpenId = null;
 }
 
-// Удаление заметки
-function deleteNote(index){
-    if(confirm('Удалить эту заметку?')){
-        notes.splice(index,1);
-        renderNotes();
-        closeFullscreen();
-        showNotification('Заметка удалена');
-    }
+// ---------- Download ----------
+function downloadNoteById(id){
+  const note = notes.find(n=>n.id===id);
+  if(!note) return;
+  const a = document.createElement('a');
+  const text = note.title + "\n\n" + note.text;
+  const blob = new Blob([text], {type: 'text/plain'});
+  a.href = URL.createObjectURL(blob);
+  const safe = (note.title || 'note').replace(/[\\\/\:\*\?\"<>\|]/g,'_').slice(0,60);
+  a.download = safe + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  showToast('Скачивание запущено');
 }
 
-// Тёмная тема
-function toggleDarkMode(){
-    document.body.classList.toggle('dark');
-    darkMode=document.body.classList.contains('dark');
-    localStorage.setItem('darkMode',JSON.stringify(darkMode));
+// ---------- Password handling ----------
+const pwOverlay = document.getElementById('passwordOverlay');
+document.getElementById('pwOk').addEventListener('click', ()=> tryPassword());
+document.getElementById('pwCancel').addEventListener('click', ()=> { /* do nothing */ });
+document.getElementById('pwInput').addEventListener('keydown', (e)=> { if(e.key==='Enter') tryPassword(); });
+
+function tryPassword(){
+  const v = document.getElementById('pwInput').value;
+  if(v === PASSWORD){
+    pwOverlay.style.display = 'none';
+    document.getElementById('mainContent').style.filter = 'none';
+    showToast('Добро пожаловать!');
+  } else {
+    alert('Неверный пароль');
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
 }
 
-// Скачать заметку
-function downloadNote(index){
-    const element=document.createElement('a');
-    const file=new Blob([notes[index].title+'\n\n'+notes[index].text],{type:'text/plain'});
-    element.href=URL.createObjectURL(file);
-    element.download=`${notes[index].title}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-}
+// ---------- Init render ----------
+renderGrid();
 
-renderNotes();
+// ---------- Save darkMode on load if changed (already applied) ----------
+localStorage.setItem('darkMode', JSON.stringify(darkMode));
+
+// ---------- Keyboard shortcuts (small help) ----------
+document.addEventListener('keydown', (e)=>{
+  if(e.key==='n' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); document.getElementById('addBtn').click(); }
+});
+
+// ---------- Accessibility small tweaks ----------
+searchEl.setAttribute('aria-label','Поиск заметок');
+document.getElementById('addBtn').setAttribute('aria-label','Добавить новую заметку');
+
+// ---------- End ----------
 </script>
 </body>
 </html>
