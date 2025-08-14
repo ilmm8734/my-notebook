@@ -1,174 +1,113 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Мой Блокнот</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+<meta charset="UTF-8">
+<title>Мой Блокнот</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-            transition: background 0.3s, color 0.3s;
-        }
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 0;
+        transition: background 0.3s, color 0.3s;
+    }
 
-        body.dark {
-            background-color: #121212;
-            color: #e0e0e0;
-        }
+    body.dark {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
 
-        header {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 30px;
-            background-color: white;
-            border-bottom: 1px solid #ff4d4d;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: background 0.3s, border-color 0.3s;
-        }
+    header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 30px;
+        background-color: white;
+        border-bottom: 1px solid #ff4d4d;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: background 0.3s, border-color 0.3s;
+    }
 
-        body.dark header {
-            background-color: #1e1e1e;
-            border-color: #ff6b6b;
-        }
+    body.dark header {
+        background-color: #1e1e1e;
+        border-color: #ff6b6b;
+    }
 
-        h1 {
-            color: #ff4d4d;
-            margin: 0;
-            font-weight: 600;
-        }
+    h1 { color: #ff4d4d; margin: 0; font-weight: 600; }
+    button {
+        background: none;
+        border: 1px solid #ff4d4d;
+        color: #ff4d4d;
+        padding: 8px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    body.dark button { border-color: #ff6b6b; color: #ff6b6b; }
+    button:hover { background-color: #ffe6e6; transform: scale(1.05); }
+    body.dark button:hover { background-color: #330000; }
 
-        button {
-            background: none;
-            border: 1px solid #ff4d4d;
-            color: #ff4d4d;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
+    input#search {
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid #ff4d4d;
+        margin-right: 10px;
+        transition: all 0.3s;
+    }
+    body.dark input#search { border-color: #ff6b6b; background-color: #1e1e1e; color: #e0e0e0; }
 
-        body.dark button {
-            border-color: #ff6b6b;
-            color: #ff6b6b;
-        }
+    .notes-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 15px;
+        padding: 20px;
+    }
 
-        button:hover {
-            background-color: #ffe6e6;
-            transform: scale(1.05);
-        }
+    .note {
+        background: white;
+        border: 1px solid #ff4d4d;
+        border-radius: 8px;
+        padding: 15px;
+        position: relative;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        cursor: pointer;
+        transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+    body.dark .note { background: #1e1e1e; border-color: #ff6b6b; color: #e0e0e0; }
 
-        body.dark button:hover {
-            background-color: #330000;
-        }
+    .fullscreen {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: white;
+        border: 1px solid #ff4d4d;
+        z-index: 1000;
+        padding: 20px;
+        overflow-y: auto;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
+    body.dark .fullscreen { background: #1e1e1e; border-color: #ff6b6b; color: #e0e0e0; }
 
-        input#search {
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid #ff4d4d;
-            margin-right: 10px;
-            transition: all 0.3s;
-        }
+    .fullscreen h3, .fullscreen p { outline: none; }
+    .fullscreen h3 { font-size: 1.8em; color: #ff4d4d; }
+    body.dark .fullscreen h3 { color: #ff6b6b; }
+    .fullscreen p { flex-grow: 1; margin-top: 10px; line-height: 1.4em; }
 
-        body.dark input#search {
-            border-color: #ff6b6b;
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-        }
+    .close-btn { align-self: flex-end; margin-bottom: 10px; cursor: pointer; border: none; background:none; font-size: 20px; color: #ff4d4d; }
+    body.dark .close-btn { color: #ff6b6b; }
 
-        .notes-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-            padding: 20px;
-        }
-
-        .note {
-            background: white;
-            border: 1px solid #ff4d4d;
-            border-radius: 8px;
-            padding: 15px;
-            position: relative;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-            animation: fadeIn 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: background 0.3s, color 0.3s, border-color 0.3s;
-        }
-
-        body.dark .note {
-            background: #1e1e1e;
-            border-color: #ff6b6b;
-            color: #e0e0e0;
-        }
-
-        .note h3 {
-            color: #ff4d4d;
-            margin: 0;
-            font-weight: 600;
-            outline: none;
-        }
-
-        body.dark .note h3 {
-            color: #ff6b6b;
-        }
-
-        .note p {
-            margin: 0;
-            line-height: 1.4em;
-            outline: none;
-        }
-
-        .note [contenteditable="true"]:focus {
-            background-color: #fff5f5;
-            border-radius: 4px;
-            padding: 2px;
-        }
-
-        body.dark .note [contenteditable="true"]:focus {
-            background-color: #330000;
-        }
-
-        .delete-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            border: none;
-            background: none;
-            color: #ff4d4d;
-            font-size: 18px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        body.dark .delete-btn {
-            color: #ff6b6b;
-        }
-
-        .delete-btn:hover {
-            transform: scale(1.2);
-        }
-
-        @keyframes fadeIn {
-            from {opacity: 0; transform: scale(0.95);}
-            to {opacity: 1; transform: scale(1);}
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-    </style>
+    @media (max-width: 500px) {
+        .notes-container { grid-template-columns: 1fr; padding: 10px; }
+        header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    }
+</style>
 </head>
 <body>
 
@@ -182,55 +121,64 @@
 </header>
 
 <div class="notes-container" id="notesContainer"></div>
+<div id="fullscreenContainer" style="display:none;"></div>
 
 <script>
-    let notes = JSON.parse(localStorage.getItem('notes')) || [];
-    let darkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
+let notes = JSON.parse(localStorage.getItem('notes')) || [];
+let darkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
+if(darkMode) document.body.classList.add('dark');
 
-    if(darkMode) document.body.classList.add('dark');
+function renderNotes() {
+    const container = document.getElementById('notesContainer');
+    container.innerHTML = '';
+    const query = document.getElementById('search').value.toLowerCase();
+    notes.forEach((note, index) => {
+        if(note.title.toLowerCase().includes(query) || note.text.toLowerCase().includes(query)) {
+            const noteElem = document.createElement('div');
+            noteElem.className = 'note';
+            noteElem.innerHTML = `<h3>${note.title}</h3><p>${note.text.substring(0,50)}...</p>`;
+            noteElem.onclick = () => openFullscreen(index);
+            container.appendChild(noteElem);
+        }
+    });
+    localStorage.setItem('notes', JSON.stringify(notes));
+}
 
-    function renderNotes() {
-        const container = document.getElementById('notesContainer');
-        container.innerHTML = '';
-        const query = document.getElementById('search').value.toLowerCase();
-        notes.forEach((note, index) => {
-            if(note.title.toLowerCase().includes(query) || note.text.toLowerCase().includes(query)) {
-                const noteElem = document.createElement('div');
-                noteElem.className = 'note';
-                noteElem.innerHTML = `
-                    <button class="delete-btn" onclick="deleteNote(${index})">✖</button>
-                    <h3 contenteditable="true" oninput="updateNote(${index}, 'title', this.innerText)">${note.title}</h3>
-                    <p contenteditable="true" oninput="updateNote(${index}, 'text', this.innerText)">${note.text}</p>
-                `;
-                container.appendChild(noteElem);
-            }
-        });
-        localStorage.setItem('notes', JSON.stringify(notes));
-    }
-
-    function addNote() {
-        notes.push({ title: 'Новая заметка', text: 'Текст...' });
-        renderNotes();
-    }
-
-    function deleteNote(index) {
-        notes.splice(index, 1);
-        renderNotes();
-    }
-
-    function updateNote(index, field, value) {
-        notes[index][field] = value;
-        localStorage.setItem('notes', JSON.stringify(notes));
-    }
-
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark');
-        darkMode = document.body.classList.contains('dark');
-        localStorage.setItem('darkMode', JSON.stringify(darkMode));
-    }
-
+function addNote() {
+    notes.push({ title: 'Новая заметка', text: 'Текст...' });
     renderNotes();
-</script>
+}
 
+function openFullscreen(index) {
+    const fullscreenContainer = document.getElementById('fullscreenContainer');
+    fullscreenContainer.style.display = 'flex';
+    fullscreenContainer.className = 'fullscreen';
+    fullscreenContainer.innerHTML = `
+        <button class="close-btn" onclick="closeFullscreen()">✖ Закрыть</button>
+        <h3 contenteditable="true" id="fsTitle">${notes[index].title}</h3>
+        <p contenteditable="true" id="fsText">${notes[index].text}</p>
+    `;
+    document.getElementById('fsTitle').oninput = (e) => updateNoteField(index, 'title', e.target.innerText);
+    document.getElementById('fsText').oninput = (e) => updateNoteField(index, 'text', e.target.innerText);
+}
+
+function closeFullscreen() {
+    document.getElementById('fullscreenContainer').style.display = 'none';
+}
+
+function updateNoteField(index, field, value) {
+    notes[index][field] = value;
+    localStorage.setItem('notes', JSON.stringify(notes));
+    renderNotes();
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark');
+    darkMode = document.body.classList.contains('dark');
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+}
+
+renderNotes();
+</script>
 </body>
 </html>
