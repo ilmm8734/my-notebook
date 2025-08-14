@@ -85,7 +85,7 @@ body.dark .header {
 }
 .input {
   display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px;
-  background:var(--card); box-shadow: var(--shadow); border:1px solid rgba(0,0,0,0.03); 
+  background:var(--card); box-shadow: var(--shadow); border:1px solid rgba(0,0,0,0.03);
 }
 body.dark .input { border:1px solid rgba(255,255,255,0.03); background:var(--glass) }
 .input input{
@@ -101,8 +101,6 @@ body.dark .input { border:1px solid rgba(255,255,255,0.03); background:var(--gla
 .btn.ghost { border-color:transparent; color:var(--muted); background:transparent; }
 .btn:hover { transform:translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06) }
 .btn.primary { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:white; border:0 }
-.body-dark .btn:hover{}
-
 .btn.small { padding:6px 10px; font-size:13px }
 
 /* Main area */
@@ -145,13 +143,20 @@ body.dark .card { border:1px solid rgba(255,255,255,0.03) }
 .pill { padding:6px 8px; font-size:12px; border-radius:8px; border:1px solid rgba(0,0,0,0.04); background:transparent; color:var(--muted) }
 body.dark .pill { border-color: rgba(255,255,255,0.03) }
 
-/* Fullscreen editor */
-.fullscreen {
-  position:fixed; inset:0; z-index:2000; display:flex; align-items:flex-start; justify-content:center;
-  padding:28px; background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.15));
+/* Fullscreen overlay (keeps clickable, outside mainContent) */
+#fsOverlay {
+  position:fixed; inset:0; z-index:2000; display:none; align-items:flex-start; justify-content:center;
+  padding:28px; pointer-events:auto;
 }
+
+/* overlay backdrop for fullscreen */
+#fsOverlay .backdrop {
+  position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.15)); backdrop-filter: blur(6px);
+}
+
+/* Fullscreen card */
 .fullscreen-card {
-  width:100%; max-width:920px; border-radius:16px; background:var(--card); padding:18px; box-shadow: 0 30px 80px rgba(10,10,12,0.4);
+  position:relative; width:100%; max-width:920px; border-radius:16px; background:var(--card); padding:18px; box-shadow: 0 30px 80px rgba(10,10,12,0.4);
   display:flex; flex-direction:column; gap:12px; box-sizing:border-box; border:1px solid rgba(0,0,0,0.04);
 }
 body.dark .fullscreen-card { border:1px solid rgba(255,255,255,0.03) }
@@ -190,6 +195,17 @@ body.dark .fs-content { border-color: rgba(255,255,255,0.03) }
 .password-modal p{ margin:0; color:var(--muted); font-size:13px }
 .password-modal input{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.06); background:transparent; color:var(--text) }
 body.dark .password-modal input { border-color: rgba(255,255,255,0.03) }
+
+/* blurred class that disables interactions only for main content */
+#mainContent.blurred { filter: blur(6px); transition:filter .18s ease; }
+#mainContent.blurred .grid,
+#mainContent.blurred .header,
+#mainContent.blurred .controls,
+#mainContent.blurred .container {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
 
 /* small responsiveness */
 @media (max-width:900px){
@@ -250,11 +266,13 @@ body.dark .password-modal input { border-color: rgba(255,255,255,0.03) }
       <div id="grid" class="grid" aria-live="polite"></div>
     </main>
 
-    <!-- fullscreen editor placeholder -->
-    <div id="fsOverlay" style="display:none;"></div>
-
     <!-- toast -->
     <div id="toast" class="toast" aria-hidden="true"></div>
+  </div>
+
+  <!-- fullscreen overlay moved OUTSIDE mainContent so it's always clickable -->
+  <div id="fsOverlay">
+    <!-- backdrop + card will be created by JS when opening -->
   </div>
 </div>
 
@@ -275,9 +293,7 @@ function uid() { return Date.now().toString(36) + Math.random().toString(36).sli
 // ---------- Small Markdown -> HTML (basic) ----------
 function mdToHtml(md){
   if(!md) return '';
-  // escape HTML first
   const esc = md.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  // lines -> lists or paragraphs
   const lines = esc.split('\n');
   let out = '', inList = false;
   for(let line of lines){
@@ -292,9 +308,7 @@ function mdToHtml(md){
     }
   }
   if(inList) out += '</ul>';
-  // inline bold **text**
   out = out.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  // inline italic *text*
   out = out.replace(/\*(.+?)\*/g, '<em>$1</em>');
   return out;
 }
@@ -328,29 +342,22 @@ function animateAndRemoveCard(cardEl, callback){
 function renderGrid(){
   const q = (searchEl.value || '').toLowerCase();
   gridEl.innerHTML = '';
-  // sort: newest first
   const sorted = notes.slice().sort((a,b)=>b.updatedAt - a.updatedAt);
   for(const note of sorted){
     if(note.title.toLowerCase().includes(q) || note.text.toLowerCase().includes(q)){
       const card = document.createElement('div');
       card.className = 'card';
       card.dataset.id = note.id;
-      // card content (rendered markdown preview)
       const meta = document.createElement('div'); meta.className='meta';
       const title = document.createElement('h3');
       title.innerText = note.title || 'Без названия';
       const date = document.createElement('div'); date.className='pill'; date.innerText = timeAgo(note.updatedAt);
       meta.appendChild(title); meta.appendChild(date);
 
-      const body = document.createElement('div');
-      body.innerHTML = mdToHtml(note.text).slice(0,300);
-      // ensure body shows as preview text
-      const previewText = document.createElement('p');
-      // try to extract text summary (strip tags)
-      const tmp = document.createElement('div'); tmp.innerHTML = body.innerHTML;
+      const tmp = document.createElement('div'); tmp.innerHTML = mdToHtml(note.text);
       let txt = tmp.innerText || '';
       if(txt.length>140) txt = txt.slice(0,140)+'...';
-      previewText.innerText = txt;
+      const previewText = document.createElement('p'); previewText.innerText = txt;
 
       const footer = document.createElement('div'); footer.className='card-footer';
       const tag = document.createElement('div'); tag.className='pill'; tag.innerText = note.tag || 'Заметка';
@@ -362,13 +369,13 @@ function renderGrid(){
 
       card.addEventListener('click', ()=> openFullscreen(note.id));
 
-      // entry animation
       card.style.opacity = '0';
       card.style.transform = 'scale(.96)';
       gridEl.appendChild(card);
       setTimeout(()=>{ card.style.opacity='1'; card.style.transform='scale(1)'; card.style.transition='all .28s cubic-bezier(.2,.9,.2,1)'; }, 30);
     }
   }
+  localStorage.setItem('notes', JSON.stringify(notes));
 }
 
 function timeAgo(ts){
@@ -408,7 +415,6 @@ document.getElementById('themeBtn').addEventListener('click', ()=>{
   localStorage.setItem('darkMode', JSON.stringify(darkMode));
 });
 
-// search input
 searchEl.addEventListener('input', ()=> renderGrid());
 
 // ---------- Fullscreen editor ----------
@@ -423,15 +429,19 @@ function openFullscreen(id){
   fsOverlay.style.alignItems = 'flex-start';
   fsOverlay.style.justifyContent = 'center';
 
-  // blur background slightly
-  document.getElementById('mainContent').style.filter = `blur(${document.body.classList.contains('dark')? '6px' : '4px'})`;
-  document.getElementById('mainContent').style.pointerEvents = 'none';
+  // add blurred class to mainContent (only background becomes non-interactive)
+  document.getElementById('mainContent').classList.add('blurred');
 
-  // build fullscreen card
+  // build backdrop + card
+  const backdrop = document.createElement('div');
+  backdrop.className = 'backdrop';
+  fsOverlay.appendChild(backdrop);
+
   const wrapper = document.createElement('div');
-  wrapper.className = 'fullscreen';
+  wrapper.className = 'fullscreen-card';
+  wrapper.setAttribute('role','dialog');
+  wrapper.setAttribute('aria-modal','true');
   wrapper.innerHTML = `
-    <div class="fullscreen-card" role="dialog" aria-modal="true">
       <div class="fs-controls">
         <div class="fs-actions">
           <button class="btn small close-fs">✖ Закрыть</button>
@@ -447,7 +457,6 @@ function openFullscreen(id){
       <div style="display:flex; gap:8px; justify-content:flex-end;">
         <button class="btn ghost close-fs">Готово</button>
       </div>
-    </div>
   `;
   fsOverlay.appendChild(wrapper);
 
@@ -466,7 +475,6 @@ function openFullscreen(id){
   });
   wrapper.querySelector('.delete-fs').addEventListener('click', ()=> {
     if(!confirm('Удалить эту заметку?')) return;
-    // animate corresponding card
     const card = gridEl.querySelector('.card[data-id="'+id+'"]');
     if(card){
       animateAndRemoveCard(card, ()=> {
@@ -503,28 +511,26 @@ function openFullscreen(id){
   fsTitle.addEventListener('input', scheduleSave);
   fsContent.addEventListener('input', scheduleSave);
 
-  // initial focus
+  // focus the content
   fsContent.focus();
 }
 
-// show saving small indicator at header
 function showSavingBadge(on){
-  // place small toast near theme button
   const btn = document.getElementById('themeBtn');
   if(on){
     btn.dataset.saving = '1';
     btn.innerText = 'Сохраняется…';
   } else {
     delete btn.dataset.saving;
-    btn.innerText = document.body.classList.contains('dark') ? '🌓 Тема' : '🌓 Тема';
+    btn.innerText = '🌓 Тема';
   }
 }
 
 function closeFullscreen(){
   fsOverlay.innerHTML = '';
   fsOverlay.style.display = 'none';
-  document.getElementById('mainContent').style.filter = 'none';
-  document.getElementById('mainContent').style.pointerEvents = 'auto';
+  // remove blur class to re-enable interactions
+  document.getElementById('mainContent').classList.remove('blurred');
   currentOpenId = null;
 }
 
@@ -547,14 +553,14 @@ function downloadNoteById(id){
 // ---------- Password handling ----------
 const pwOverlay = document.getElementById('passwordOverlay');
 document.getElementById('pwOk').addEventListener('click', ()=> tryPassword());
-document.getElementById('pwCancel').addEventListener('click', ()=> { /* do nothing */ });
+document.getElementById('pwCancel').addEventListener('click', ()=> { /* ничего */ });
 document.getElementById('pwInput').addEventListener('keydown', (e)=> { if(e.key==='Enter') tryPassword(); });
 
 function tryPassword(){
   const v = document.getElementById('pwInput').value;
   if(v === PASSWORD){
     pwOverlay.style.display = 'none';
-    document.getElementById('mainContent').style.filter = 'none';
+    document.getElementById('mainContent').classList.remove('blurred');
     showToast('Добро пожаловать!');
   } else {
     alert('Неверный пароль');
@@ -563,22 +569,21 @@ function tryPassword(){
   }
 }
 
+// Blur mainContent initially while password overlay shown
+document.getElementById('mainContent').classList.add('blurred');
+
 // ---------- Init render ----------
 renderGrid();
-
-// ---------- Save darkMode on load if changed (already applied) ----------
 localStorage.setItem('darkMode', JSON.stringify(darkMode));
 
-// ---------- Keyboard shortcuts (small help) ----------
+// small shortcuts
 document.addEventListener('keydown', (e)=>{
   if(e.key==='n' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); document.getElementById('addBtn').click(); }
 });
 
-// ---------- Accessibility small tweaks ----------
+// accessibility
 searchEl.setAttribute('aria-label','Поиск заметок');
 document.getElementById('addBtn').setAttribute('aria-label','Добавить новую заметку');
-
-// ---------- End ----------
 </script>
 </body>
 </html>
