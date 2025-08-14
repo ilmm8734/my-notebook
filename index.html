@@ -20,6 +20,9 @@ body.dark {
     color: #e0e0e0;
 }
 
+/* Главный блокнот */
+#mainContent { filter: none; transition: filter 0.3s; }
+
 header {
     display: flex;
     flex-wrap: wrap;
@@ -103,6 +106,7 @@ body.dark .note h3 { color:#ff6b6b; }
     display: flex;
     flex-direction: column;
     transition: background 0.3s, color 0.3s;
+    box-sizing: border-box;
 }
 
 body.dark .fullscreen { background: #1e1e1e; border-color: #ff6b6b; color:#e0e0e0; }
@@ -112,8 +116,24 @@ body.dark .fullscreen { background: #1e1e1e; border-color: #ff6b6b; color:#e0e0e
 body.dark .fullscreen h3 { color:#ff6b6b; }
 .fullscreen p { flex-grow:1; margin-top:10px; line-height:1.4em; white-space: pre-wrap; }
 
-.close-btn { align-self:flex-end; margin-bottom:10px; cursor:pointer; border:none; background:none; font-size:20px; color:#ff4d4d; }
-body.dark .close-btn { color:#ff6b6b; }
+.close-btn, .delete-btn, .download-btn {
+    margin:5px 5px 5px 0;
+    padding:6px 12px;
+    border-radius:6px;
+    border:1px solid #ff4d4d;
+    background:none;
+    color:#ff4d4d;
+    cursor:pointer;
+    font-size:14px;
+    transition:all 0.3s;
+}
+
+body.dark .close-btn, body.dark .delete-btn, body.dark .download-btn {
+    border-color:#ff6b6b; color:#ff6b6b;
+}
+
+.close-btn:hover, .delete-btn:hover, .download-btn:hover { background-color:#ffe6e6; }
+body.dark .close-btn:hover, body.dark .delete-btn:hover, body.dark .download-btn:hover { background-color:#330000; }
 
 #notification {
     position: fixed;
@@ -131,14 +151,62 @@ body.dark .close-btn { color:#ff6b6b; }
 
 body.dark #notification { background:#ff6b6b; }
 
+/* Пароль */
+#passwordOverlay {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:2000;
+}
+
+#passwordBox {
+    background: white;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.3);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:90%;
+    max-width:350px;
+}
+
+body.dark #passwordBox { background:#1e1e1e; color:#e0e0e0; }
+
+#passwordBox input {
+    padding:8px 12px;
+    border-radius:6px;
+    border:1px solid #ff4d4d;
+    margin-bottom:15px;
+    width:100%;
+    font-size:16px;
+}
+
+body.dark #passwordBox input { border-color:#ff6b6b; background:#121212; color:#e0e0e0; }
+
+#passwordBox button { width:100%; }
 @media (max-width:500px) {
     .notes-container { grid-template-columns:1fr; padding:10px; }
     header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    #passwordBox { padding:20px; }
 }
 </style>
 </head>
 <body>
 
+<div id="passwordOverlay">
+    <div id="passwordBox">
+        <h2>Введите пароль</h2>
+        <input type="password" id="sitePassword" placeholder="Пароль">
+        <button onclick="checkPassword()">Войти</button>
+    </div>
+</div>
+
+<div id="mainContent">
 <header>
     <h1>Мой Блокнот</h1>
     <div class="header-controls">
@@ -152,8 +220,20 @@ body.dark #notification { background:#ff6b6b; }
 <div class="notes-container" id="notesContainer"></div>
 <div id="fullscreenContainer" style="display:none;"></div>
 <div id="notification"></div>
+</div>
 
 <script>
+// Пароль
+function checkPassword(){
+    const val=document.getElementById('sitePassword').value;
+    if(val==='87653421'){
+        document.getElementById('passwordOverlay').style.display='none';
+        document.getElementById('mainContent').style.filter='none';
+    }else{
+        alert('Неверный пароль!');
+    }
+}
+
 // Инициализация
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
 let darkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
@@ -182,7 +262,6 @@ function renderNotes() {
             noteElem.innerHTML=`<h3>${note.title}</h3><p>${note.text.substring(0,50)}...</p>`;
             noteElem.onclick=()=>openFullscreen(index);
             container.appendChild(noteElem);
-            // Анимация появления
             setTimeout(()=>{noteElem.style.opacity=1; noteElem.style.transform='scale(1)';},50);
         }
     });
@@ -211,10 +290,13 @@ function openFullscreen(index){
     container.style.display='flex';
     container.className='fullscreen';
     container.innerHTML=`
-        <button class="close-btn" onclick="closeFullscreen()">✖ Закрыть</button>
+        <div style="display:flex; justify-content:flex-end; gap:5px; flex-wrap:wrap; margin-bottom:10px;">
+            <button class="close-btn" onclick="closeFullscreen()">✖ Закрыть</button>
+            <button class="download-btn" onclick="downloadNote(${index})">💾 Скачать</button>
+            <button class="delete-btn" onclick="deleteNote(${index})">🗑 Удалить</button>
+        </div>
         <h3 contenteditable="true" id="fsTitle">${notes[index].title}</h3>
         <p contenteditable="true" id="fsText">${notes[index].text}</p>
-        <button onclick="downloadNote(${index})">💾 Скачать</button>
     `;
     const fsTitle=document.getElementById('fsTitle');
     const fsText=document.getElementById('fsText');
@@ -229,7 +311,7 @@ function openFullscreen(index){
 
     fsTitle.oninput=fsText.oninput=(e)=>{
         if(saveTimeout) clearTimeout(saveTimeout);
-        saveTimeout=setTimeout(save, 1000); // автосохранение через 1 сек
+        saveTimeout=setTimeout(save, 1000); // автосохранение
     };
 }
 
@@ -238,11 +320,14 @@ function closeFullscreen(){
     document.getElementById('fullscreenContainer').style.display='none';
 }
 
-// Обновление отдельного поля заметки
-function updateNoteField(index,field,value){
-    notes[index][field]=value;
-    localStorage.setItem('notes',JSON.stringify(notes));
-    renderNotes();
+// Удаление заметки
+function deleteNote(index){
+    if(confirm('Удалить эту заметку?')){
+        notes.splice(index,1);
+        renderNotes();
+        closeFullscreen();
+        showNotification('Заметка удалена');
+    }
 }
 
 // Тёмная тема
