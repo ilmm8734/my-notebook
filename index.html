@@ -19,12 +19,6 @@
   --shadow: 0 6px 20px rgba(17,24,39,0.08);
   --radius: 14px;
   --blur: 8px;
-
-  /* animation tokens */
-  --ani-fast: 160ms;
-  --ani-med: 300ms;
-  --ani-slow: 520ms;
-  --easing: cubic-bezier(.2,.9,.2,1);
 }
 
 body.dark{
@@ -36,611 +30,144 @@ body.dark{
   --accent-2: #ff8484;
   --glass: rgba(255,255,255,0.03);
   --shadow: 0 10px 30px rgba(0,0,0,0.6);
-  --radius: 12px;
-  --blur: 6px;
 }
 
 *{box-sizing:border-box}
-html,body{height:100%; margin:0; font-family:Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
-a{color:inherit}
+html,body{height:100%; margin:0; font-family:Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text)}
 
-/* Respect reduced motion */
-@media (prefers-reduced-motion:reduce){
-  *{transition:none !important; animation:none !important}
-}
+.app { min-height:100vh; display:flex; flex-direction:column; }
 
-/* Layout */
-.app {
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  transition:filter .35s ease, opacity .35s ease;
-}
+.header { display:flex; gap:16px; align-items:center; justify-content:space-between; padding:18px 24px; background:var(--card); box-shadow:var(--shadow) }
 
-/* Header */
-.header {
-  display:flex;
-  gap:16px;
-  align-items:center;
-  justify-content:space-between;
-  padding:18px 24px;
-  backdrop-filter: blur(6px);
-  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.35));
-  border-bottom: 1px solid rgba(0,0,0,0.03);
-  box-shadow: var(--shadow);
-  transition: background var(--ani-med) var(--easing), box-shadow var(--ani-med) var(--easing), transform var(--ani-med) var(--easing);
-}
-body.dark .header {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
+.brand { display:flex; align-items:center; gap:12px; }
+.logo { width:44px; height:44px; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:18px; }
 
-/* Left title */
-.brand {
-  display:flex; align-items:center; gap:12px;
-}
-.logo {
-  width:44px; height:44px; border-radius:10px;
-  background: linear-gradient(135deg,var(--accent),var(--accent-2));
-  display:flex; align-items:center; justify-content:center; color:white; font-weight:700; box-shadow: 0 6px 18px rgba(255,77,77,0.18);
-  font-family:Poppins, Inter; font-size:18px;
-  transition: transform var(--ani-fast) var(--easing), box-shadow var(--ani-fast) var(--easing);
-}
-.logo:hover{ transform: translateY(-3px) rotate(-2deg) scale(1.03); box-shadow: 0 12px 30px rgba(255,77,77,0.14); }
+.controls { display:flex; gap:10px; align-items:center; }
 
-.title {
-  display:flex; flex-direction:column;
-}
-.title .main {font-weight:700; font-size:16px}
-.title .sub {font-size:12px; color:var(--muted)}
+.btn { cursor:pointer; border:none; border-radius:8px; padding:6px 12px; font-weight:600; }
+.btn.primary { background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:white }
+.btn.small { font-size:13px; padding:4px 8px }
 
-/* Controls */
-.controls {
-  display:flex; gap:10px; align-items:center;
-}
-.input {
-  display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px;
-  background:var(--card); box-shadow: var(--shadow); border:1px solid rgba(0,0,0,0.03);
-  transition: box-shadow var(--ani-fast) var(--easing), transform var(--ani-fast) var(--easing);
-}
-body.dark .input { border:1px solid rgba(255,255,255,0.03); background:var(--glass) }
-.input input{
-  border:0; outline:none; background:transparent; color:var(--text); width:220px; font-size:14px;
-}
-.input:focus-within{ transform: translateY(-2px); box-shadow: 0 12px 30px rgba(2,6,23,0.06); }
+.save-indicator { width:12px; height:12px; border-radius:50%; background:var(--muted); transition:background .3s; }
+.save-indicator.saving { background:#22c55e; }
 
-/* Buttons */
-.btn {
-  display:inline-flex; gap:8px; align-items:center; padding:8px 12px; border-radius:10px;
-  border:1px solid var(--accent); background:transparent; color:var(--accent); cursor:pointer; font-weight:600;
-  transition:all var(--ani-fast) var(--easing); font-size:14px;
-}
-.btn.ghost { border-color:transparent; color:var(--muted); background:transparent; }
-.btn:hover { transform:translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.06) }
-.btn.primary { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:white; border:0 }
-.btn.small { padding:6px 10px; font-size:13px }
+.container { padding:20px; flex:1 }
+.grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:18px; }
 
-/* Main area */
-.container {
-  padding:20px;
-  max-width:1100px;
-  margin:18px auto;
-  width:calc(100% - 40px);
-  flex:1;
-}
+.card { position:relative; background:var(--card); border-radius:12px; padding:14px; box-shadow:var(--shadow); cursor:pointer; display:flex; flex-direction:column; gap:10px; min-height:110px; transition:transform .25s, box-shadow .25s }
+.card:hover { transform:translateY(-6px); box-shadow:0 14px 40px rgba(0,0,0,0.1) }
 
-/* Grid */
-.grid {
-  display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap:18px;
-}
+.card .meta { display:flex; justify-content:space-between; align-items:center; }
+.card h3 { margin:0; font-size:15px; color:var(--accent); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.card p { margin:0; font-size:13px; color:var(--muted); line-height:1.3; overflow:hidden; max-height:3.6em }
 
-/* Note card */
-.card {
-  background:var(--card);
-  border-radius:12px;
-  padding:14px;
-  box-shadow: var(--shadow);
-  border:1px solid rgba(0,0,0,0.03);
-  transition: transform var(--ani-med) var(--easing), opacity var(--ani-med) var(--easing), box-shadow var(--ani-med) var(--easing);
-  cursor:pointer;
-  display:flex; flex-direction:column; gap:10px; min-height:110px; overflow:hidden;
-  transform-origin:center center;
-  will-change:transform, opacity;
-  opacity:0; transform: translateY(8px) scale(.995);
-}
-body.dark .card { border:1px solid rgba(255,255,255,0.03) }
+.card .actions { position:absolute; top:8px; right:8px; display:flex; gap:6px; opacity:0; transition:opacity .25s }
+.card:hover .actions { opacity:1 }
+.actions button { background:var(--card); border:1px solid rgba(0,0,0,0.05); border-radius:6px; cursor:pointer; padding:4px; font-size:12px }
 
-.card.visible{ opacity:1; transform:none }
+.card img { max-width:100%; border-radius:6px; margin-top:6px }
 
-.card:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 18px 50px rgba(2,6,23,0.12) }
+/* Fullscreen */
+#fsOverlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); backdrop-filter:blur(6px); z-index:2000; }
+.fullscreen-card { background:var(--card); border-radius:14px; padding:18px; width:95%; max-width:900px; box-shadow:0 20px 60px rgba(0,0,0,0.4); display:flex; flex-direction:column; gap:12px; transform:scale(.9); opacity:0; transition:transform .25s, opacity .25s }
+.fullscreen-card.enter { transform:scale(1); opacity:1 }
 
-/* remove hover effects on touch devices */
-@media (hover: none) and (pointer: coarse){
-  .card:hover { transform:none; box-shadow: var(--shadow) }
-  .logo:hover{ transform:none }
-  .btn:hover{ transform:none }
-}
+.fs-title { font-size:20px; font-weight:700; color:var(--accent); }
+.fs-content { flex:1; min-height:200px; border:1px dashed rgba(0,0,0,0.1); border-radius:10px; padding:10px; overflow:auto }
+.fs-content[contenteditable="true"]{ outline:none }
 
-.card .meta { display:flex; justify-content:space-between; align-items:center; gap:8px; }
-.card h3 { margin:0; color:var(--accent); font-size:15px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.card p { margin:0; color:var(--muted); font-size:13px; line-height:1.3; overflow:hidden; max-height:3.6em; }
-
-/* small footer inside card */
-.card .card-footer { display:flex; gap:8px; align-items:center; justify-content:flex-start; margin-top:auto; }
-
-.pill { padding:6px 8px; font-size:12px; border-radius:8px; border:1px solid rgba(0,0,0,0.04); background:transparent; color:var(--muted) }
-body.dark .pill { border-color: rgba(255,255,255,0.03) }
-
-/* Fullscreen overlay (keeps clickable, outside mainContent) */
-#fsOverlay {
-  position:fixed; inset:0; z-index:2000; display:none; align-items:flex-start; justify-content:center;
-  padding:28px; pointer-events:auto;
-}
-
-/* overlay backdrop for fullscreen */
-#fsOverlay .backdrop {
-  position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.15)); backdrop-filter: blur(6px);
-  opacity:0; transition: opacity var(--ani-med) var(--easing);
-}
-#fsOverlay .backdrop.show { opacity:1 }
-
-/* Fullscreen card */
-.fullscreen-card {
-  position:relative; width:100%; max-width:920px; border-radius:16px; background:var(--card); padding:18px; box-shadow: 0 30px 80px rgba(10,10,12,0.4);
-  display:flex; flex-direction:column; gap:12px; box-sizing:border-box; border:1px solid rgba(0,0,0,0.04);
-  opacity:0; transform: translateY(-12px) scale(.995); transition: transform var(--ani-med) var(--easing), opacity var(--ani-med) var(--easing), box-shadow var(--ani-med) var(--easing);
-}
-.fullscreen-card.enter { opacity:1; transform:none }
-.fullscreen-card.leave { opacity:0; transform: translateY(6px) scale(.98) }
-body.dark .fullscreen-card { border:1px solid rgba(255,255,255,0.03) }
-
-.fs-controls { display:flex; gap:8px; align-items:center; justify-content:space-between; }
-.fs-actions { display:flex; gap:8px; align-items:center; }
-
-.fs-title { font-size:20px; font-weight:700; color:var(--accent); padding:6px 8px; border-radius:8px; transition: color var(--ani-fast) var(--easing); }
-body.dark .fs-title { color: var(--accent) }
-
-.fs-content { min-height:320px; max-height:60vh; overflow:auto; padding:8px; border-radius:10px; background: transparent; border:1px dashed rgba(0,0,0,0.04); transition: box-shadow var(--ani-fast) var(--easing); }
-body.dark .fs-content { border-color: rgba(255,255,255,0.03) }
-
-/* contenteditable styling */
-[contenteditable="true"]{ outline:none; caret-color:var(--accent); color:var(--text); font-size:15px; line-height:1.5 }
-.fs-title[contenteditable="true"]{ font-size:22px; font-weight:700; }
-.fs-content[contenteditable="true"]{ white-space:pre-wrap; }
-
-/* Notification */
-.toast {
-  position:fixed; left:50%; transform:translateX(-50%) translateY(20px); bottom:26px; z-index:3000;
-  padding:10px 16px; border-radius:12px; background:var(--accent); color:white; font-weight:600; box-shadow:0 8px 30px rgba(0,0,0,0.2);
-  opacity:0; transition: transform var(--ani-fast) var(--easing), opacity var(--ani-fast) var(--easing);
-  pointer-events:none;
-}
-.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-/* Password overlay */
-.overlay {
-  position:fixed; inset:0; z-index:5000; display:flex; align-items:center; justify-content:center;
-  background: linear-gradient(180deg, rgba(2,6,23,0.55), rgba(2,6,23,0.6));
-  opacity:0; transition: opacity var(--ani-med) var(--easing);
-}
-.overlay.show { opacity:1 }
-.password-modal {
-  width: calc(100% - 48px); max-width:420px; border-radius:14px; padding:22px; background:var(--card); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-  display:flex; flex-direction:column; gap:12px; align-items:center; transform: translateY(6px); transition: transform var(--ani-med) var(--easing);
-}
-.overlay.show .password-modal{ transform:none }
-.password-modal h2{ margin:0; font-size:18px; color:var(--text) }
-.password-modal p{ margin:0; color:var(--muted); font-size:13px }
-.password-modal input{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.06); background:transparent; color:var(--text) }
-body.dark .password-modal input { border-color: rgba(255,255,255,0.03) }
-
-/* blurred class that disables interactions only for main content */
-#mainContent.blurred { filter: blur(6px); transition:filter .18s ease; }
-#mainContent.blurred .grid,
-#mainContent.blurred .header,
-#mainContent.blurred .controls,
-#mainContent.blurred .container {
-  pointer-events: none;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-/* small responsiveness */
-@media (max-width:900px){
-  .input input { width:140px }
-  .container { padding:12px }
-}
-@media (max-width:560px){
-  .header { padding:12px }
-  .controls { gap:8px; flex-wrap:wrap; }
-  .brand .title .sub { display:none }
-  .grid { gap:12px }
-  .card { min-height:90px }
-  .fs-content { max-height:50vh }
-}
-
-/* Slightly reduce animation intensity on small screens */
-@media (max-width:560px){
-  :root{ --ani-fast:120ms; --ani-med:200ms; }
-  .card:hover{ transform:translateY(-6px) scale(1.02) }
-}
 </style>
 </head>
 <body>
-
-<div class="app" id="appRoot">
-  <!-- Password overlay (shown until correct) -->
-  <div id="passwordOverlay" class="overlay show" aria-hidden="false" style="display:flex;">
-    <div class="password-modal" role="dialog" aria-modal="true">
-      <h2>Доступ к блокноту</h2>
-      <p>Введите пароль, чтобы открыть блокнот</p>
-      <input id="pwInput" type="password" placeholder="Введите пароль">
-      <div style="width:100%; display:flex; gap:8px;">
-        <button class="btn primary" style="flex:1" id="pwOk">Войти</button>
-        <button class="btn ghost" style="flex:1" id="pwCancel">Отмена</button>
-      </div>
-      <small style="color:var(--muted); margin-top:6px">Подсказка: у тебя есть код доступа</small>
+<div class="app">
+  <header class="header">
+    <div class="brand"><div class="logo">MB</div><div>Мой Блокнот</div></div>
+    <div class="controls">
+      <button class="btn primary" id="addBtn">＋ Новая</button>
+      <div class="save-indicator" id="saveIndicator"></div>
     </div>
-  </div>
+  </header>
 
-  <!-- Main content -->
-  <div id="mainContent" class="main">
-    <header class="header">
-      <div class="brand">
-        <div class="logo">MB</div>
-        <div class="title">
-          <div class="main">Мой Блокнот</div>
-          <div class="sub">Простой, красивый и личный</div>
-        </div>
-      </div>
+  <main class="container">
+    <div id="grid" class="grid"></div>
+  </main>
 
-      <div class="controls">
-        <div class="input" role="search" aria-label="Поиск">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="opacity:.6"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <input id="searchInput" placeholder="Поиск заметок..." />
-        </div>
-
-        <button class="btn" id="addBtn">＋ Новая</button>
-        <button class="btn" id="clearBtn">🗑 Очистить</button>
-        <button class="btn" id="themeBtn">🌓 Тема</button>
-      </div>
-    </header>
-
-    <main class="container">
-      <div id="grid" class="grid" aria-live="polite"></div>
-    </main>
-
-    <!-- toast -->
-    <div id="toast" class="toast" aria-hidden="true"></div>
-  </div>
-
-  <!-- fullscreen overlay moved OUTSIDE mainContent so it's always clickable -->
-  <div id="fsOverlay">
-    <!-- backdrop + card will be created by JS when opening -->
-  </div>
+  <div id="fsOverlay"></div>
 </div>
 
 <script>
-// ---------- Data and storage ----------
-const PASSWORD = '87653421';
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
-let darkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
-let autosaveTimer = null;
-let currentOpenId = null; // id of open fullscreen note
+let autosaveTimer=null;
+let currentOpenId=null;
 
-if (darkMode) document.body.classList.add('dark');
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
 
-// Utility: uid
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
-
-// ---------- Small Markdown -> HTML (basic) ----------
-function mdToHtml(md){
-  if(!md) return '';
-  const esc = md.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const lines = esc.split('\n');
-  let out = '', inList = false;
-  for(let line of lines){
-    const trimmed = line.trim();
-    if(trimmed.match(/^(\-|\*)\s+/)){
-      if(!inList){ out += '<ul>'; inList = true; }
-      out += '<li>' + trimmed.replace(/^(\-|\*)\s+/, '') + '</li>';
-    } else {
-      if(inList){ out += '</ul>'; inList = false; }
-      if(trimmed==='') out += '<br>';
-      else out += '<p>' + trimmed + '</p>';
-    }
-  }
-  if(inList) out += '</ul>';
-  out = out.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  out = out.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  return out;
-}
-
-// ---------- Rendering ----------
-const gridEl = document.getElementById('grid');
-const searchEl = document.getElementById('searchInput');
-const toastEl = document.getElementById('toast');
-
-function saveAll(){
-  localStorage.setItem('notes', JSON.stringify(notes));
-}
-
-function showToast(text, ms=1400){
-  toastEl.textContent = text;
-  toastEl.classList.add('show');
-  toastEl.setAttribute('aria-hidden','false');
-  clearTimeout(toastEl._timeout);
-  toastEl._timeout = setTimeout(()=>{ toastEl.classList.remove('show'); toastEl.setAttribute('aria-hidden','true'); }, ms);
-}
-
-// add animation helper for removal
-function animateAndRemoveCard(cardEl, callback){
-  cardEl.style.transition = 'transform .28s ease, opacity .28s ease';
-  cardEl.style.transform = 'scale(.85)';
-  cardEl.style.opacity = '0';
-  setTimeout(()=>{ callback(); }, 300);
-}
+function saveAll(){ localStorage.setItem('notes', JSON.stringify(notes)); }
 
 function renderGrid(){
-  const q = (searchEl.value || '').toLowerCase();
-  gridEl.innerHTML = '';
-  const sorted = notes.slice().sort((a,b)=>b.updatedAt - a.updatedAt);
-  for(const note of sorted){
-    if(note.title.toLowerCase().includes(q) || note.text.toLowerCase().includes(q)){
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.dataset.id = note.id;
-      const meta = document.createElement('div'); meta.className='meta';
-      const title = document.createElement('h3');
-      title.innerText = note.title || 'Без названия';
-      const date = document.createElement('div'); date.className='pill'; date.innerText = timeAgo(note.updatedAt);
-      meta.appendChild(title); meta.appendChild(date);
-
-      const tmp = document.createElement('div'); tmp.innerHTML = mdToHtml(note.text);
-      let txt = tmp.innerText || '';
-      if(txt.length>140) txt = txt.slice(0,140)+'...';
-      const previewText = document.createElement('p'); previewText.innerText = txt;
-
-      const footer = document.createElement('div'); footer.className='card-footer';
-      const tag = document.createElement('div'); tag.className='pill'; tag.innerText = note.tag || 'Заметка';
-      footer.appendChild(tag);
-
-      card.appendChild(meta);
-      card.appendChild(previewText);
-      card.appendChild(footer);
-
-      card.addEventListener('click', ()=> openFullscreen(note.id));
-
-      gridEl.appendChild(card);
-
-      // animate in (use requestAnimationFrame so CSS transition triggers)
-      requestAnimationFrame(()=>{ card.classList.add('visible'); });
-    }
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  const sorted=[...notes].sort((a,b)=> (b.pinned?1:0)-(a.pinned?1:0) || b.updatedAt-a.updatedAt);
+  for(const n of sorted){
+    const card=document.createElement('div');
+    card.className='card'; card.dataset.id=n.id;
+    card.innerHTML=`<div class="meta"><h3>${n.title||'Без названия'}</h3><span>${n.pinned?'📌':''}</span></div><p>${n.text.slice(0,120)}</p>${n.image?`<img src="${n.image}">`:''}<div class="actions"><button data-act="edit">✏</button><button data-act="pin">📌</button><button data-act="del">🗑</button></div>`;
+    card.querySelector('.actions').addEventListener('click', e=>{
+      e.stopPropagation();
+      if(e.target.dataset.act==='edit') openFullscreen(n.id,card);
+      if(e.target.dataset.act==='pin'){ n.pinned=!n.pinned; saveAll(); renderGrid(); }
+      if(e.target.dataset.act==='del'){ notes=notes.filter(x=>x.id!==n.id); saveAll(); renderGrid(); }
+    });
+    card.addEventListener('click',()=>openFullscreen(n.id,card));
+    grid.appendChild(card);
   }
-  localStorage.setItem('notes', JSON.stringify(notes));
 }
 
-function timeAgo(ts){
-  if(!ts) return '';
-  const d = Date.now() - ts;
-  const sec = Math.floor(d/1000);
-  if(sec < 10) return 'только что';
-  if(sec < 60) return sec + ' сек. назад';
-  const min = Math.floor(sec/60);
-  if(min < 60) return min + ' мин. назад';
-  const h = Math.floor(min/60);
-  if(h < 24) return h + ' ч. назад';
-  const days = Math.floor(h/24);
-  return days + ' дн. назад';
-}
-
-// ---------- Actions ----------
-document.getElementById('addBtn').addEventListener('click', ()=>{
-  const n = { id: uid(), title: 'Новая заметка', text: 'Текст...', updatedAt: Date.now(), tag: 'Заметка' };
-  notes.push(n);
-  saveAll();
-  renderGrid();
-  showToast('Заметка добавлена');
-});
-
-document.getElementById('clearBtn').addEventListener('click', ()=>{
-  if(!confirm('Удалить все заметки? Это действие нельзя отменить.')) return;
-  notes = [];
-  saveAll();
-  renderGrid();
-  showToast('Все заметки удалены');
-});
-
-document.getElementById('themeBtn').addEventListener('click', ()=>{
-  document.body.classList.toggle('dark');
-  darkMode = document.body.classList.contains('dark');
-  localStorage.setItem('darkMode', JSON.stringify(darkMode));
-});
-
-searchEl.addEventListener('input', ()=> renderGrid());
-
-// ---------- Fullscreen editor ----------
-const fsOverlay = document.getElementById('fsOverlay');
-
-function openFullscreen(id){
-  const note = notes.find(n => n.id === id);
-  if(!note) return;
-  currentOpenId = id;
-  fsOverlay.innerHTML = '';
-  fsOverlay.style.display = 'flex';
-  fsOverlay.style.alignItems = 'flex-start';
-  fsOverlay.style.justifyContent = 'center';
-
-  // add blurred class to mainContent (only background becomes non-interactive)
-  document.getElementById('mainContent').classList.add('blurred');
-
-  // build backdrop + card
-  const backdrop = document.createElement('div');
-  backdrop.className = 'backdrop';
-  fsOverlay.appendChild(backdrop);
-
-  const wrapper = document.createElement('div');
-  wrapper.className = 'fullscreen-card';
-  wrapper.setAttribute('role','dialog');
-  wrapper.setAttribute('aria-modal','true');
-  wrapper.innerHTML = `
-      <div class="fs-controls">
-        <div class="fs-actions">
-          <button class="btn small close-fs">✖ Закрыть</button>
-          <button class="btn small download-fs">💾 Скачать</button>
-          <button class="btn small delete-fs">🗑 Удалить</button>
-        </div>
-        <div style="display:flex; gap:8px; align-items:center">
-          <div class="fs-title" id="fsTitle" contenteditable="true"></div>
-          <div style="color:var(--muted); font-size:13px; margin-left:8px" id="fsTime"></div>
-        </div>
-      </div>
-      <div class="fs-content" id="fsContent" contenteditable="true"></div>
-      <div style="display:flex; gap:8px; justify-content:flex-end;">
-        <button class="btn ghost close-fs">Готово</button>
-      </div>
-  `;
-  fsOverlay.appendChild(wrapper);
-
-  // tiny delay so CSS transitions apply
-  requestAnimationFrame(()=>{ backdrop.classList.add('show'); wrapper.classList.add('enter'); });
-
-  // populate
-  const fsTitle = document.getElementById('fsTitle');
-  const fsContent = document.getElementById('fsContent');
-  const fsTime = document.getElementById('fsTime');
-  fsTitle.innerText = note.title;
-  fsContent.innerText = note.text;
-  fsTime.innerText = timeAgo(note.updatedAt);
-
-  // handlers
-  wrapper.querySelectorAll('.close-fs').forEach(b => b.addEventListener('click', ()=> closeFullscreen()));
-  wrapper.querySelector('.download-fs').addEventListener('click', ()=> {
-    downloadNoteById(id);
+function openFullscreen(id, card){
+  const n=notes.find(x=>x.id===id); if(!n)return;
+  currentOpenId=id;
+  const overlay=document.getElementById('fsOverlay');
+  overlay.style.display='flex';
+  overlay.innerHTML=`<div class="fullscreen-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="fs-title" contenteditable="true">${n.title}</div><button class="btn small" onclick="closeFs()">✖</button></div><div class="fs-content" id="fsContent" contenteditable="true">${n.text}</div><input type="file" id="imgInput" accept="image/*"><button class="btn small" onclick="saveNote()">💾 Сохранить</button></div>`;
+  requestAnimationFrame(()=>overlay.firstChild.classList.add('enter'));
+  document.getElementById('fsContent').addEventListener('input',scheduleSave);
+  overlay.querySelector('.fs-title').addEventListener('input',scheduleSave);
+  document.getElementById('imgInput').addEventListener('change',e=>{
+    const file=e.target.files[0];
+    if(file){ const r=new FileReader(); r.onload=()=>{n.image=r.result; scheduleSave();}; r.readAsDataURL(file);} 
   });
-  wrapper.querySelector('.delete-fs').addEventListener('click', ()=> {
-    if(!confirm('Удалить эту заметку?')) return;
-    const card = gridEl.querySelector('.card[data-id="'+id+'"]');
-    if(card){
-      animateAndRemoveCard(card, ()=> {
-        notes = notes.filter(n=>n.id!==id);
-        saveAll();
-        renderGrid();
-      });
-    } else {
-      notes = notes.filter(n=>n.id!==id);
-      saveAll();
-      renderGrid();
-    }
-    closeFullscreen();
-    showToast('Заметка удалена');
-  });
-
-  // autosave on input (debounced)
-  function scheduleSave(){
-    if(autosaveTimer) clearTimeout(autosaveTimer);
-    showSavingBadge(true);
-    autosaveTimer = setTimeout(()=> {
-      const idx = notes.findIndex(n=>n.id===id);
-      if(idx>=0){
-        notes[idx].title = fsTitle.innerText.trim() || 'Без названия';
-        notes[idx].text = fsContent.innerText;
-        notes[idx].updatedAt = Date.now();
-        saveAll();
-        renderGrid();
-        showToast('Заметка сохранена');
-      }
-      showSavingBadge(false);
-    }, 900);
-  }
-  fsTitle.addEventListener('input', scheduleSave);
-  fsContent.addEventListener('input', scheduleSave);
-
-  // focus the content
-  fsContent.focus();
 }
 
-function showSavingBadge(on){
-  const btn = document.getElementById('themeBtn');
-  if(on){
-    btn.dataset.saving = '1';
-    btn.innerText = 'Сохраняется…';
-  } else {
-    delete btn.dataset.saving;
-    btn.innerText = '🌓 Тема';
-  }
+function closeFs(){
+  const overlay=document.getElementById('fsOverlay');
+  overlay.style.display='none'; overlay.innerHTML='';
+  currentOpenId=null;
 }
 
-function closeFullscreen(){
-  // animate out if present
-  const backdrop = fsOverlay.querySelector('.backdrop');
-  const wrapper = fsOverlay.querySelector('.fullscreen-card');
-  if(wrapper) wrapper.classList.add('leave');
-  if(backdrop) backdrop.classList.remove('show');
-  // remove blur class to re-enable interactions after animation ends
-  setTimeout(()=>{
-    fsOverlay.innerHTML = '';
-    fsOverlay.style.display = 'none';
-    document.getElementById('mainContent').classList.remove('blurred');
-    currentOpenId = null;
-  }, 260);
+function scheduleSave(){
+  clearTimeout(autosaveTimer);
+  document.getElementById('saveIndicator').classList.add('saving');
+  autosaveTimer=setTimeout(saveNote,800);
 }
 
-// ---------- Download ----------
-function downloadNoteById(id){
-  const note = notes.find(n=>n.id===id);
-  if(!note) return;
-  const a = document.createElement('a');
-  const text = note.title + "\n\n" + note.text;
-  const blob = new Blob([text], {type: 'text/plain'});
-  a.href = URL.createObjectURL(blob);
-  const safe = (note.title || 'note').replace(/[\\\\\/:\*\?\"<>\|]/g,'_').slice(0,60);
-  a.download = safe + '.txt';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  showToast('Скачивание запущено');
+function saveNote(){
+  if(!currentOpenId)return;
+  const overlay=document.getElementById('fsOverlay');
+  const n=notes.find(x=>x.id===currentOpenId);
+  if(!n)return;
+  n.title=overlay.querySelector('.fs-title').innerText;
+  n.text=overlay.querySelector('#fsContent').innerText;
+  n.updatedAt=Date.now();
+  saveAll(); renderGrid();
+  document.getElementById('saveIndicator').classList.remove('saving');
 }
 
-// ---------- Password handling ----------
-const pwOverlay = document.getElementById('passwordOverlay');
-document.getElementById('pwOk').addEventListener('click', ()=> tryPassword());
-document.getElementById('pwCancel').addEventListener('click', ()=> { /* ничего */ });
-document.getElementById('pwInput').addEventListener('keydown', (e)=> { if(e.key==='Enter') tryPassword(); });
+document.getElementById('addBtn').addEventListener('click',()=>{
+  notes.push({id:uid(), title:'Новая заметка', text:'', updatedAt:Date.now(), pinned:false, image:null});
+  saveAll(); renderGrid();
+});
 
-function tryPassword(){
-  const v = document.getElementById('pwInput').value;
-  if(v === PASSWORD){
-    pwOverlay.classList.remove('show');
-    pwOverlay.style.display = 'none';
-    document.getElementById('mainContent').classList.remove('blurred');
-    showToast('Добро пожаловать!');
-  } else {
-    alert('Неверный пароль');
-    document.getElementById('pwInput').value = '';
-    document.getElementById('pwInput').focus();
-  }
-}
-
-// Blur mainContent initially while password overlay shown
-if(document.getElementById('passwordOverlay')){
-  document.getElementById('mainContent').classList.add('blurred');
-}
-
-// ---------- Init render ----------
 renderGrid();
-localStorage.setItem('darkMode', JSON.stringify(darkMode));
-
-// small shortcuts
-document.addEventListener('keydown', (e)=>{
-  if(e.key==='n' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); document.getElementById('addBtn').click(); }
-});
-
-// accessibility
-searchEl.setAttribute('aria-label','Поиск заметок');
-document.getElementById('addBtn').setAttribute('aria-label','Добавить новую заметку');
 </script>
 </body>
 </html>
